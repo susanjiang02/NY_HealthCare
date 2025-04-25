@@ -97,7 +97,7 @@ def update_appt(patient_name, doctor_name, old_date, old_time, new_date, new_tim
     return f"Appointment had been updated from {old_time.strftime('%H:%M')} on {old_date} to {new_time.strftime('%H:%M')} on {new_date}."
 
 # print(cancel_appointement('John Smith', 'DR. R', '2025-04-06', '10:00'))
-# print(update_appointment('John Smith', 'DR. R', '2025-04-06', '10:00', '2025-04-09', '11:30'))
+#print(update_appt('John Smith', 'DR. R', '2025-04-06', '10:00', '2025-04-09', '11:30'))
     
 def view_all_appts(): #Data Analytics feature
     print('Here are all the appointments.')
