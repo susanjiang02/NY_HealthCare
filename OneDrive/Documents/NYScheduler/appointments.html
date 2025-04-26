@@ -19,7 +19,10 @@
         <!-- Appointment Form -->
         <div class="form-container">
             <h2>Book an Appointment</h2>
-            <form id="appointmentForm">
+            <form id="appointmentForm" method="POST" action="/book">
+                <label for = "patient"> Your First and Last Name</label>
+                <input type = "text" id = "patient" name = "patient" required>
+                
                 <label for="date">Select Date</label>
                 <input type="date" id="date" name="date" requried>
 
