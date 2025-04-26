@@ -1,4 +1,4 @@
-# import sqlite3
+
 import pyodbc
 import os
 from datetime import datetime, timedelta
@@ -6,9 +6,6 @@ from datetime import datetime, timedelta
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 db_file= os.path.join(base_dir, "PatientDatabase","patientapointdb.accdb")
-# print("Full DB Path:", db_file)
-# print("Exists:", os.path.exists(db_file))
-
 
 conn_str= (
     r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
@@ -18,27 +15,10 @@ conn_str= (
 conn1 = pyodbc.connect(conn_str)
 cursor1 = conn1.cursor()
 
-# conn = sqlite3.connect(':memory:') #creates temp
-# cursor = conn.cursor() #sql commands
-
-# try:
-#     cursor1.execute(''' 
-#         CREATE TABLE Appointment(
-#                 ID AUTOINCREMENT PRIMARY KEY,
-#                 PatientName TEXT NOT NULL,
-#                 DoctorName TEXT NOT NULL,
-#                 AppointmentDate DATE NOT NULL,
-#                 AppointmentTime TEXT NOT NULL)
-#     ''')
-#     conn1.commit()
-# except pyodbc.ProgrammingError as e:
-#     if "already exists" in str(e):
-#         print("The Table is already made, skipping creation.")
-#     else:
-#         raise
 
 
-def create_appt(patient_name, doctor_name, date, time):
+
+def create_appt(patient_name, doctor_name, date, time, reason):
     try:
         time = datetime.strptime(time, '%H:%M').time()
     except ValueError:
@@ -58,13 +38,6 @@ def create_appt(patient_name, doctor_name, date, time):
     conn1.commit()
 
     return f"Appointment booked for {patient_name} with {doctor_name} at {time.strftime('%H:%M')} on {date}."
-
-# patient_name = input('Enter your name: \n')
-# doctor_name = input('The name of your doctor: \n')
-# date = input('Enter the appointment date (YYYY-MM-DD): \n')
-# time = input('Enter the time of the appointment (HH:MM): \n')
-# test_result = create_appt(patient_name, doctor_name, date, time)
-# print(test_result)
 
 
 def cancel_appt(patient_name, doctor_name, date, time):
@@ -119,24 +92,12 @@ def update_appt(patient_name, doctor_name, old_date, old_time, new_date, new_tim
     conn1.commit()
     return f"Appointment had been updated from {old_time.strftime('%H:%M')} on {old_date} to {new_time.strftime('%H:%M')} on {new_date}."
 
-# print(cancel_appointement('John Smith', 'DR. R', '2025-04-06', '10:00'))
-#print(update_appt('John Smith', 'DR. R', '2025-04-06', '10:00', '2025-04-09', '11:30'))
-    
+  
 def view_all_appts(): #Data Analytics feature
     print('Here are all the Appointment.')
     cursor1.execute("SELECT * FROM Appointment")
     return cursor1.fetchall()
     
-
-
-
-# cursor.execute("SELECT * FROM Appointment")
-# rows = cursor.fetchall()
-
-# for row in rows:
-#     print(row)
-
-# print("Database path:", db_file)
 
 cursor1.execute("SELECT * FROM Appointment WHERE 1=0;")
 column_names = [desc[0] for desc in cursor1.description]
