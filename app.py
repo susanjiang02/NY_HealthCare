@@ -12,29 +12,74 @@ conn_str = (
     rf'DBQ={db_file};'
 )
 
-@app.route('/')
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+
+@app.route('/appointments')
 def index():
-    return render_template('appointments.html')
+    conn1 = pyodbc.connect(conn_str)
+    cursor1 = conn1.cursor()
+    cursor1.execute("SELECT PatientName, AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit FROM Appointment")
+    rows = cursor1.fetchall()
+    conn1.close()
+
+    appointments = [
+        {
+            "patient": row.PatientName,
+            "date": row.AppointmentDate,
+            "time": row.AppointmentTime,
+            "doctor": row.DoctorName,
+            "reason": row.ReasonForVisit
+        } for row in rows
+    ]
+    return render_template('appointments.html', appointments= appointments)
 
 
 
 @app.route('/book', methods=['POST'])
 def book_appointment():
-    patient_name = request.form['patientName']
-    doctor_name = request.form['doctor']
-    date = request.form['date']
-    time = request.form['time']
-    reason = request.form['reason']
+    data = request.get_json()
 
     conn1 = pyodbc.connect(conn_str)
     cursor1 = conn1.cursor()
 
-    try:
-        cursor1.execute('''
-            INSERT INTO Appointment (AppointmentDate, AppointmentTime, ReasonForVisit, DoctorName, PatientName)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (date, time, reason, doctor_name, patient_name))
-        conn1.commit()
-        return redirect('/')
-    except Exception as e:
-        return f"An error occurred: {e}"
+   
+    cursor1.execute('''
+        INSERT INTO Appointment (AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (data['AppointmentDate'], data['AppointmentTime'], data['DoctorName'], data['ReasonForVisit'], data['PatientName']))
+    conn1.commit()
+    conn1.close()
+    return '', 200
+       
+
+@app.route('/api/appointments')
+def view_all_appointments():
+    conn1 = pyodbc.connect(conn_str)
+    cursor1 = conn1.cursor()
+    cursor1.execute("SELECT AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName FROM Appointment")
+    rows = cursor1.fetchall()
+    conn1.close()
+    appointments = [
+        {
+            "patient": row.PatientName,
+            "date": row.AppointmentDate,
+            "time": row.AppointmentTime,
+            "doctor": row.DoctorName,
+            "reason": row.ReasonForVisit
+        } for row in rows
+    ]
+    
+    return jsonify(appointments)
+
+if __name__=='__main__':
+    app.run(debug=True)
