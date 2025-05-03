@@ -24,6 +24,9 @@
             <form id="appointmentForm" method="POST" action="/book">
                 <label for = "patient"> Your First and Last Name</label>
                 <input type = "text" id = "patient" name = "patient" required>
+
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" required>
                 
                 <label for="date">Select Date</label>
                 <input type="date" id="date" name="date" required>
@@ -56,6 +59,9 @@
                 <label for="update-patient">Your First and Last Name</label>
                 <input type="text" id="update-patient" name="patient" required>
 
+                <label for="update-phone">Phone Number</label>
+                <input type="tel" id="update-phone" name="phone" required>
+
                 <label for="update-date">Select Date</label>
                 <input type="date" id="update-date" name="date" required>
 
@@ -85,6 +91,7 @@
             <thead>
                 <tr>
                     <th>Patient</th>
+                    <th>Phone Number</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Doctor</th>
@@ -96,6 +103,7 @@
                 {% for appt in appointments %}  
                 <tr>
                     <td>{{appt.patient }}</td>
+                    <td>{{appt.phone }}</td>
                     <td>{{appt.date }}</td>
                     <td>{{appt.time }}</td>
                     <td>{{appt.doctor }}</td>
@@ -131,6 +139,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${appointment.patient}</td>
+                        <td>${appointment.phone}</td>
                         <td>${appointment.date}</td>
                         <td>${appointment.time}</td>
                         <td>${appointment.doctor}</td>
@@ -157,6 +166,7 @@
 
             const formData = {
                 patient: document.getElementById('patient').value,
+                phone: document.getElementById('phone').value,
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
                 doctor: document.getElementById('doctor').value,
@@ -198,6 +208,7 @@
         function showUpdateForm(appointment) {
             document.getElementById('update-id').value = appointment.AppointmentID;
             document.getElementById('update-patient').value = appointment.patient;
+            document.getElementById('update-phone').value = appointment.phone;
             document.getElementById('update-date').value = appointment.date;
             document.getElementById('update-time').value = appointment.time;
             document.getElementById('update-doctor').value = appointment.doctor;
@@ -216,6 +227,7 @@
             const updatedData = {
                 id: document.getElementById('update-id').value,
                 patient: document.getElementById('update-patient').value,
+                phone: document.getElementById('update-phone').value,
                 date: document.getElementById('update-date').value,
                 time: document.getElementById('update-time').value,
                 doctor: document.getElementById('update-doctor').value,
