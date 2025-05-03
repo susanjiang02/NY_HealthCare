@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect
+from datetime import datetime
 import pyodbc
 import os
 from appoinment_feature import create_appt
@@ -38,6 +39,7 @@ def index():
 
     appointments = [  #gets appt info
         {
+            "AppointmentID": row.AppointmentID,
             "patient": row.PatientName,
             "date": row.AppointmentDate,
             "time": row.AppointmentTime,
@@ -84,18 +86,21 @@ def view_all_appointments():
     cursor1.execute("SELECT AppointmentID, AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName FROM Appointment")
     rows = cursor1.fetchall()
     conn1.close()
-    appointments = [
-        {
-            "AppointmentID": row.AppointmentID,
-            "patient": row.PatientName,
-            "date": row.AppointmentDate,
-            "time": row.AppointmentTime,
-            "doctor": row.DoctorName,
-            "reason": row.ReasonForVisit
-        } for row in rows
-    ]
-    # print(appointments)
+
+    appointments = []
+    for row in rows:
+        appointments.append({
+            "AppointmentID":row.AppointmentID,
+            "patient":row.PatientName,
+            "date":str(row.AppointmentDate),
+            "time":str(row.AppointmentTime),
+            "doctor":row.DoctorName,
+            "reason":row.ReasonForVisit
+
+        })
+    
     return jsonify(appointments)
+        
 
 @app.route('/delete/<int:appointment_id>', methods=['DELETE'])
 def delete_appt(appointment_id):
@@ -110,6 +115,26 @@ def delete_appt(appointment_id):
         return 'Could not delete', 500
     finally:
         conn1.close()
+
+@app.route('/update/<int:appointment_id>', methods=['PUT'])
+def update_appt(appointment_id):
+    data = request.get_json()
+    conn1 = pyodbc.connect(conn_str)
+    cursor1 = conn1.cursor()
+    try:
+        cursor1.execute(''' 
+            UPDATE Appointment
+            SET PatientName = ?, AppointmentDate = ?, AppointmentTime = ?, DoctorName = ?, ReasonForVisit = ?
+            WHERE AppointmentID = ?
+        ''', (data['patient'], data['date'], data['time'], data['doctor'], data['reason'], appointment_id ))
+        conn1.commit()
+        return '', 204
+    except Exception as e:
+        print("Could not update appointment: ", e)
+        return "Could not update", 500
+    finally:
+        conn1.close()
+
    
 
 if __name__=='__main__':
