@@ -33,9 +33,9 @@
                 <label for="doctor">Select Doctor</label>
                 <select id="doctor" name="doctor" required>
                     <option value="select-doctor">--Select doctor--</option>
-                    <option value="Smith">Dr. Smith</option>
-                    <option value="Johnson">Dr. Johnson</option>
-                    <option value="Lee">Dr. Lee</option>
+                    {% for doctor in doctors %}  
+                    <option value ="{{ doctor }}">Dr. {{ doctor }}</option>
+                    {% endfor %}
                 </select>
 
                 <label for="reason">Reason for Visit</label>
@@ -66,6 +66,9 @@
                     <td>{{appt.time }}</td>
                     <td>{{appt.doctor }}</td>
                     <td>{{appt.reason }}</td>
+                    <td>
+                        <button onclick="confirmDelete('{{ appt.AppointmentID }}')">Delete</button>
+                    </td>
                 </tr>
                 {% endfor%}
             </tbody>
@@ -88,13 +91,14 @@
                     <td>${appointment.time}</td>
                     <td>${appointment.doctor}</td>
                     <td>${appointment.reason}</td>
+                   <td><button onclick="confirmDelete('${appointment.AppointmentID}')">Delete</button></td>
                 `;
                 appointmentsTableBody.appendChild(row);
             });
         }
         
         document.getElementById('appointmentForm').addEventListener('submit', async function(event) {
-            // event.preventDefault();
+            event.preventDefault();
 
             const formData = {
                 patient: document.getElementById('patient').value,
@@ -107,7 +111,7 @@
             const response = await fetch('/book', {
                 method: 'POST', 
                 headers: {
-                    'Content Type': 'application/json'
+                    'Content-Type': 'application/json'
                 }, 
                 body: JSON.stringify(formData)
             });
@@ -123,49 +127,18 @@
 
         window.onload = getApptsFromDB;
 
-        // // Array to hold booked appointments
-        // const appointments = [];
-
-        // document.getElementById('appointmentForm').addEventListener('submit', function(event) {
-        //     event.preventDefault(); // Prevent the default form submission
-
-        //     const date = document.getElementById('date').value;
-        //     const time = document.getElementById('time').value;
-        //     const doctor = document.getElementById('doctor').value;
-        //     const reason = document.getElementById('reason').value;
-
-        //     // Create an appointment object
-        //     const appointment = {
-        //         date: date,
-        //         time: time,
-        //         doctor: doctor,
-        //         reason: reason
-        //     };
-
-        //     // Add the appointment to the array
-        //     appointments.push(appointment);
-        //     // Update the appointments table
-        //     updateAppointmentsTable();
-        //     // Reset the form
-        //     document.getElementById('appointmentForm').reset();
-        // });
-
-        // function updateAppointmentsTable() {
-        //     const appointmentsTableBody = document.getElementById('appointmentsTableBody');
-        //     appointmentsTableBody.innerHTML = ''; // Clear the current table body
-
-        //     // Loop through the appointments and create table rows
-        //     appointments.forEach((appointment) => {
-        //         const row = document.createElement('tr');
-        //         row.innerHTML = `
-        //             <td>${appointment.date}</td>
-        //             <td>${appointment.time}</td>
-        //             <td>${appointment.doctor}</td>
-        //             <td>${appointment.reason}</td>
-        //         `;
-        //         appointmentsTableBody.appendChild(row);
-        //     });
-        // }
+        function confirmDelete(id) {
+            if (confirm("Do you want to delete this appointment? Once you do it will be deleted forever.")) {
+                fetch(`/delete/${id}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            getApptsFromDB();
+                        } else {
+                            alert("Was not able to delete appointment.");
+                        }
+                    });
+            }
+        }
     </script>
 </body>
 </html>
