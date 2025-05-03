@@ -156,12 +156,14 @@ def get_doctor_schedules():
     """)
 
 
+
     schedules_by_doctor = defaultdict(list)
     for row in cursor1.fetchall():
-        full_schedule =  f"{row.AppointmentDate} at {row.AppointmentTime}"
-        schedules_by_doctor[row.Doctor].append(full_schedule)
+        date_str = row.AppointmentDate.strftime("%Y-%m-%d")
+        time_str = row.AppointmentTime.strftime("%H:%M:%S")
+        schedules_by_doctor[row.Doctor].append(f"{date_str} at {time_str}")
 
-    
+    conn1.close()
     return schedules_by_doctor 
 
    
