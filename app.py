@@ -35,9 +35,8 @@ def register():
 def index():
     conn1 = pyodbc.connect(conn_str)
     cursor1 = conn1.cursor()
-    cursor1.execute("SELECT AppointmentID, PatientName, AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit FROM Appointment")
+    cursor1.execute("SELECT AppointmentID, PatientName, AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PhoneNumber FROM Appointment")
     rows = cursor1.fetchall()
-    # conn1.close()
 
     appointments = [  #gets appt info
         {
@@ -46,7 +45,8 @@ def index():
             "date": row.AppointmentDate,
             "time": row.AppointmentTime,
             "doctor": row.DoctorName,
-            "reason": row.ReasonForVisit
+            "reason": row.ReasonForVisit,
+            "phone": row.PhoneNumber
         } for row in rows
     ]
         #get doctor info
@@ -61,31 +61,59 @@ def index():
 
 @app.route('/book', methods=['POST'])
 def book_appointment():
-    data = request.get_json()
-    patient_name = data.get('patient')
-    appointment_date = data.get('date')
-    appointment_time = data.get('time')
-    doctor_name = data.get('doctor')
-    reason_for_visit = data.get('reason')
+    try:
+        data = request.get_json()
+        print(f"Received data: {data}")
 
-    conn1 = pyodbc.connect(conn_str)
-    cursor1 = conn1.cursor()
 
-    cursor1.execute(''' 
-        INSERT INTO Appointment(AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName)
-        VALUES (?,?,?,?,?)
-''', (appointment_date, appointment_time, doctor_name, reason_for_visit, patient_name))
-    
-    conn1.commit()
-    conn1.close()
+        patient_name = data.get('patient')
+        appointment_date = data.get('date')
+        appointment_time = data.get('time')
+        doctor_name = data.get('doctor')
+        reason_for_visit = data.get('reason')
+        phone_number = data.get('phone')
 
-    return jsonify({"message": "Appointment has been booked."}), 200
+        if not all([patient_name, appointment_date, appointment_time, doctor_name, reason_for_visit]):
+            return jsonify({"error": "Missing info"}), 400
+
+        conn1 = pyodbc.connect(conn_str)
+        cursor1 = conn1.cursor()
+
+
+        cursor1.execute(''' 
+            INSERT INTO Appointment(AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName, PhoneNumber)
+            VALUES (?,?,?,?,?,?)
+    ''', (appointment_date, appointment_time, doctor_name, reason_for_visit, patient_name, phone_number))
+        
+        conn1.commit()
+        conn1.close()
+
+        return jsonify({"message": "Appointment has been booked."}), 200
+
+    except Exception as e:
+        print("Error could not book appt:", e)
+        return jsonify({"error":"Could not book appt"}), 500
+    finally:
+        conn1.close
 
 @app.route('/api/appointments')
 def view_all_appointments():
     conn1 = pyodbc.connect(conn_str)
     cursor1 = conn1.cursor()
-    cursor1.execute("SELECT AppointmentID, AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName FROM Appointment")
+    cursor1.execute("""
+        SELECT
+            Appointment.AppointmentID,
+            Appointment.AppointmentDate,
+            Appointment.AppointmentTime,
+            Appointment.DoctorName,
+            Appointment.ReasonForVisit,
+            Appointment.PatientName,
+            Appointment.PhoneNumber 
+        FROM Appointment
+        LEFT JOIN Patient
+        ON
+            Patient.FirstName & ' ' & Patient.LastName = Appointment.PatientName
+    """)
     rows = cursor1.fetchall()
     conn1.close()
 
@@ -94,6 +122,7 @@ def view_all_appointments():
         appointments.append({
             "AppointmentID":row.AppointmentID,
             "patient":row.PatientName,
+            "phone": row.PhoneNumber,
             "date":str(row.AppointmentDate),
             "time":str(row.AppointmentTime),
             "doctor":row.DoctorName,
@@ -123,14 +152,25 @@ def update_appt(appointment_id):
     data = request.get_json()
     conn1 = pyodbc.connect(conn_str)
     cursor1 = conn1.cursor()
+
     try:
         cursor1.execute(''' 
             UPDATE Appointment
-            SET PatientName = ?, AppointmentDate = ?, AppointmentTime = ?, DoctorName = ?, ReasonForVisit = ?
+            SET PatientName = ?, AppointmentDate = ?, AppointmentTime = ?, DoctorName = ?, ReasonForVisit = ?, PhoneNumber = ?
             WHERE AppointmentID = ?
-        ''', (data['patient'], data['date'], data['time'], data['doctor'], data['reason'], appointment_id ))
+        ''', (
+            data.get('patient'),
+            data.get('date'),
+            data.get('time'),
+            data.get('doctor'),
+            data.get('reason'),
+            data.get('phone'),  # make sure 'phone' key exists in request
+            appointment_id
+        ))
+
         conn1.commit()
         return '', 204
+
     except Exception as e:
         print("Could not update appointment: ", e)
         return "Could not update", 500
