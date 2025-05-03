@@ -67,7 +67,7 @@
                     <td>{{appt.doctor }}</td>
                     <td>{{appt.reason }}</td>
                 </tr>
-                {% endfor %}
+                {% endfor%}
             </tbody>
         </table>
     </div>
@@ -94,7 +94,7 @@
         }
         
         document.getElementById('appointmentForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
+            // event.preventDefault();
 
             const formData = {
                 patient: document.getElementById('patient').value,
