@@ -20,3 +20,4 @@ cursor1 = conn1.cursor()
 cursor1.execute("SELECT Doctor.FirstName + ' ' + Doctor.LastName AS Doctor, Appointment.AppointmentDate+ + Appointment.AppointmentTime As Schedule FROM Appointment INNER JOIN Doctor ON Appointment.DoctorID=Doctor.DoctorID;")
 for i in cursor1.fetchall():
     print(i)
+    
