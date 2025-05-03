@@ -138,7 +138,31 @@ def update_appt(appointment_id):
 
 @app.route('/doctors')
 def doctor():
+    # schedules = get_doctor_schedules()
     return render_template('doctors.html')
+
+def get_doctor_schedules():
+    conn1 = pyodbc.connect(conn_str)
+    cursor1 = conn1.cursor()
+
+    cursor1.execute("""
+        SELECT 
+            Doctor.FirstName + ' ' + Doctor.LastName AS Doctor,
+            Appointment.AppointmentDate,
+            Appointment.AppointmentTime
+        FROM Appointment
+        INNER JOIN Doctor ON Appointment.DoctorID = Doctor.DoctorID;
+    """)
+
+    results = [
+        {
+            "doctor": row.Doctor,
+            "schedule": f"{row.AppointmentDate} {row.AppointmentTime}"
+        }
+        for row in cursor1.fetchall()
+    ]
+    conn1.close()
+    return results 
 
    
 
