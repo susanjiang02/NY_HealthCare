@@ -59,3 +59,17 @@ th {
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
+
+.grid-container{
+    display: grid;
+    grid-template-columns: 150px 150px;
+    grid-gap: 30px;
+}
+
+.grid-item{
+    height:200;
+    width:200;
+    text-align: center;
+}
+
+
