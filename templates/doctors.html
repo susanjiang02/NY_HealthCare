@@ -19,42 +19,33 @@
     <main>
         <h2>Doctor</h2>
         <div class="grid-container">
-            <img src="{{ url_for('static', filename='images/doc1.png') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> John Smith <br> Neurologist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc2.png') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Andre Cole <br> General Practitioner </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc6.png') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Paulette Weber <br> General Practitioner </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc3.jpg') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Earl Devine <br> Oncologist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc4.jpg') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Andrian Simons <br> General Cardiologist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc7.png') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Maria Fowler<br> Cardiologist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc8.png') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Nancy McDonald <br> Dermatologist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc5.jpg') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Steve Kim <br> Psychiatrist </h4>
-            </div>
-            <img src="{{ url_for('static', filename='images/doc9.jpg') }}" class="grid-item" height="100" width="100">
-            <div class="grid-item"> 
-                <h4> Taylor Hensly <br> Pediatrician </h4>
-            </div>
+            {% set doctors = [
+                {"name": "John Smith", "title": "Neurologist", "img": "doc1.png"},
+                {"name": "Andre Cole", "title": "General Practitioner", "img": "doc2.png"},
+                {"name": "Paulette Weber", "title": "General Practitioner", "img": "doc6.png"},
+                {"name": "Earl Devine", "title": "Oncologist", "img": "doc3.jpg"},
+                {"name": "Andrian Simons", "title": "General Cardiologist", "img": "doc4.jpg"},
+                {"name": "Maria Fowler", "title": "Cardiologist", "img": "doc7.png"},
+                {"name": "Nancy McDonald", "title": "Dermatologist", "img": "doc8.png"},
+                {"name": "Steve Kim", "title": "Psychiatrist", "img": "doc5.jpg"},
+                {"name": "Taylor Hensly", "title": "Pediatrician", "img": "doc9.jpg"}
+            ] %}
+
+            {% for doctor in doctors %}
+                <div class="grid-item">
+                    <img src="{{ url_for('static', filename='images/' ~ doctor.img) }}" height="100" width="100">
+                    <h4>{{ doctor.name }}<br>{{ doctor.title }}</h4>
+                    <p><strong>Schedule:</strong></p>
+                    <ul>
+                        {% for sched in schedules.get(doctor.name, []) %}
+                            <li>{{ sched }}</li>
+                        {% else %}
+                            <li>No upcoming appointments</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
         
     </main>
 </body>

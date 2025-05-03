@@ -3,6 +3,7 @@ from datetime import datetime
 import pyodbc
 import os
 from appoinment_feature import create_appt
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -138,8 +139,8 @@ def update_appt(appointment_id):
 
 @app.route('/doctors')
 def doctor():
-    # schedules = get_doctor_schedules()
-    return render_template('doctors.html')
+    schedules = get_doctor_schedules()
+    return render_template('doctors.html', schedules=schedules)
 
 def get_doctor_schedules():
     conn1 = pyodbc.connect(conn_str)
@@ -154,15 +155,14 @@ def get_doctor_schedules():
         INNER JOIN Doctor ON Appointment.DoctorID = Doctor.DoctorID;
     """)
 
-    results = [
-        {
-            "doctor": row.Doctor,
-            "schedule": f"{row.AppointmentDate} {row.AppointmentTime}"
-        }
-        for row in cursor1.fetchall()
-    ]
-    conn1.close()
-    return results 
+
+    schedules_by_doctor = defaultdict(list)
+    for row in cursor1.fetchall():
+        full_schedule =  f"{row.AppointmentDate} at {row.AppointmentTime}"
+        schedules_by_doctor[row.Doctor].append(full_schedule)
+
+    
+    return schedules_by_doctor 
 
    
 
