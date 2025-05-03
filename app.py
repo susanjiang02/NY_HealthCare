@@ -12,6 +12,10 @@ conn_str = (
     rf'DBQ={db_file};'
 )
 
+@app.route('/')
+def root():
+    return redirect('/home')
+
 @app.route('/home')
 def home():
     return render_template('home.html')
@@ -47,20 +51,24 @@ def index():
 
 @app.route('/book', methods=['POST'])
 def book_appointment():
-    data = request.get_json()
+    patient_name = request.form.get('patient')
+    appointment_date = request.form.get('date')
+    appointment_time = request.form.get('time')
+    doctor_name = request.form.get('doctor')
+    reason_for_visit = request.form.get('reason')
 
     conn1 = pyodbc.connect(conn_str)
     cursor1 = conn1.cursor()
 
-   
-    cursor1.execute('''
-        INSERT INTO Appointment (AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (data['AppointmentDate'], data['AppointmentTime'], data['DoctorName'], data['ReasonForVisit'], data['PatientName']))
+    cursor1.execute(''' 
+        INSERT INTO Appointment(AppointmentDate, AppointmentTime, DoctorName, ReasonForVisit, PatientName)
+        VALUES (?,?,?,?,?)
+''', (appointment_date, appointment_time, doctor_name, reason_for_visit, patient_name))
+    
     conn1.commit()
     conn1.close()
-    return '', 200
-       
+
+    return redirect('/appointments')
 
 @app.route('/api/appointments')
 def view_all_appointments():
