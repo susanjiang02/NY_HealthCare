@@ -30,6 +30,10 @@ def login():
 def register():
     return render_template('register.html')
 
+@app.route('/patients')
+def patients():
+    return render_template('patients.html')
+
 
 @app.route('/appointments')
 def index():
